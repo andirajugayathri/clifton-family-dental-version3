@@ -9,30 +9,35 @@
 		$(".preloader").fadeOut(600);
 	});
 
-	/* Sticky Header */	
-	if($('.active-sticky-header').length){
-		$window.on('resize', function(){
-			setHeaderHeight();
-		});
+	/* Sticky Header and Slick Menu Initialization */
+	function initNavbar() {
+		/* Sticky Header */	
+		if($('.active-sticky-header').length){
+			$window.on('resize', function(){
+				setHeaderHeight();
+			});
 
-		function setHeaderHeight(){
-	 		$("header.main-header").css("height", $('header .header-sticky').outerHeight());
+			function setHeaderHeight(){
+				$("header.main-header").css("height", $('header .header-sticky').outerHeight());
+			}	
+		
+			$(window).on("scroll", function() {
+				var fromTop = $(window).scrollTop();
+				setHeaderHeight();
+				var headerHeight = $('header .header-sticky').outerHeight()
+				$("header .header-sticky").toggleClass("hide", (fromTop > headerHeight + 100));
+				$("header .header-sticky").toggleClass("active", (fromTop > 600));
+			});
 		}	
-	
-		$(window).on("scroll", function() {
-			var fromTop = $(window).scrollTop();
-			setHeaderHeight();
-			var headerHeight = $('header .header-sticky').outerHeight()
-			$("header .header-sticky").toggleClass("hide", (fromTop > headerHeight + 100));
-			$("header .header-sticky").toggleClass("active", (fromTop > 600));
+		
+		/* Slick Menu JS */
+		$('#menu').slicknav({
+			label : '',
+			prependTo : '.responsive-menu'
 		});
-	}	
-	
-	/* Slick Menu JS */
-	$('#menu').slicknav({
-		label : '',
-		prependTo : '.responsive-menu'
-	});
+	}
+	// Expose initNavbar globally so it can be called from the fetch callback
+	window.initNavbar = initNavbar;
 
 	if($("a[href='#top']").length){
 		$("a[href='#top']").click(function() {
@@ -376,6 +381,10 @@ document.addEventListener("DOMContentLoaded", function () {
         .then(response => response.text())
         .then(data => {
             document.getElementById("navbar").innerHTML = data;
+            // Initialize navbar scripts after content is loaded
+            if (window.initNavbar) {
+                window.initNavbar();
+            }
         });
 
     fetch("footer.html")
